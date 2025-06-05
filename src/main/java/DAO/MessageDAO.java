@@ -30,6 +30,10 @@ public class MessageDAO {
         return null;
     }
 
+    public Message getMessage(int id) {
+        return null;
+    }
+
     public List<Message> getAllMessages(){
         return null;
     }

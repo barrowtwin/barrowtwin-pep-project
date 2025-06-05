@@ -111,11 +111,14 @@ public class SocialMediaController {
     }
 
     private void getMessages(Context context) {
-        context.json("sample text");
+        List<Message> messages = messageService.getAllMessages();
+        context.json(messages);
     }
 
     private void getMessage(Context context) {
-        context.json("sample text");
+        int id = Integer.valueOf(context.pathParam("message_id"));
+        Message message = messageService.getMessage(id);
+        context.json(message);
     }
 
     private void deleteMessage(Context context) {

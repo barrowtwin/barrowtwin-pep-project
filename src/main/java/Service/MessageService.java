@@ -20,6 +20,10 @@ public class MessageService {
         return messageDAO.insertMessage(message);
     }
 
+    public Message getMessage(int id) {
+        return messageDAO.getMessage(id);
+    }
+
     public List<Message> getAllMessages() {
         return messageDAO.getAllMessages();
     }
