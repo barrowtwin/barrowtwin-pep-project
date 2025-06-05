@@ -86,8 +86,28 @@ public class SocialMediaController {
         }
     }
 
-    private void createMessage(Context context) {
-        context.json("sample text");
+    private void createMessage(Context context) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        Message message = mapper.readValue(context.body(), Message.class);
+        List<Account> users = accountService.getAllAccounts();
+        boolean userExists = false;
+        for(Account u : users) {
+            if(u.getAccount_id() == message.getPosted_by()) {
+                userExists = true;
+            }
+        }
+        if(message.getMessage_text().length() > 0 && message.getMessage_text().length() <= 255 && userExists) {
+            Message createdMessage = messageService.addMessage(message);
+            if(createdMessage != null) {
+                context.json(mapper.writeValueAsString(createdMessage));
+            }
+            else {
+                context.status(400);
+            }
+        }
+        else {
+            context.status(400);
+        }
     }
 
     private void getMessages(Context context) {
