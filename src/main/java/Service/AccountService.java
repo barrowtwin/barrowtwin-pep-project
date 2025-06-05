@@ -1,5 +1,7 @@
 package Service;
 
+import java.util.List;
+
 import DAO.AccountDAO;
 import Model.Account;
 
@@ -16,5 +18,9 @@ public class AccountService {
 
     public Account addUser(Account user) {
         return accountDAO.insertUser(user);
+    }
+
+    public List<Account> getAllAccounts() {
+        return accountDAO.getAllAccounts();
     }
 }

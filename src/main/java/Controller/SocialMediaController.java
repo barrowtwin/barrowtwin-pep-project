@@ -6,6 +6,9 @@ import Service.AccountService;
 import Service.MessageService;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
+
+import java.util.List;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -31,7 +34,7 @@ public class SocialMediaController {
     public Javalin startAPI() {
         Javalin app = Javalin.create();
         app.post("/register", this::registerUser);
-        app.get("/login", this::login);
+        app.post("/login", this::login);
         app.post("/messages", this::createMessage);
         app.get("/messages", this::getMessages);
         app.get("/messages/{message_id}", this::getMessage);
@@ -50,7 +53,7 @@ public class SocialMediaController {
         Account user = mapper.readValue(context.body(), Account.class);
         if(user.getUsername().length() > 0 && user.getPassword().length() >= 4) {
             Account addedUser = accountService.addUser(user);
-            if(addedUser!=null){
+            if(addedUser != null) {
                 context.json(mapper.writeValueAsString(addedUser));
             }
             else {
@@ -62,8 +65,25 @@ public class SocialMediaController {
         }
     }
 
-    private void login(Context context) {
-        context.json("sample text");
+    private void login(Context context) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        Account user = mapper.readValue(context.body(), Account.class);
+        List<Account> users = accountService.getAllAccounts();
+        boolean userExists = false;
+        boolean correctPassword = false;
+        for(Account u : users) {
+            if(user.getUsername().equals(u.getUsername())) {
+                userExists = true;
+                if(user.getPassword().equals(u.getPassword())) {
+                    correctPassword = true;
+                    // May need to change what is sent to this method
+                    context.json(u);
+                }
+            }
+        }
+        if(userExists == false || correctPassword == false) {
+            context.status(401);
+        }
     }
 
     private void createMessage(Context context) {
