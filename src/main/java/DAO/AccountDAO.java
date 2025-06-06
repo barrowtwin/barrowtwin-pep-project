@@ -12,7 +12,7 @@ public class AccountDAO {
     public Account insertUser(Account user){
         Connection connection = ConnectionUtil.getConnection();
         try {
-            String sql = "INSERT INTO account(username, password) VALUES(?,?)";
+            String sql = "INSERT INTO account(username, password) VALUES(?,?);";
             PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
             preparedStatement.setString(1, user.getUsername());
@@ -41,9 +41,10 @@ public class AccountDAO {
                 Account user = new Account(rs.getInt("account_id"), rs.getString("username"), rs.getString("password"));
                 accounts.add(user);
             }
+            return accounts;
         }catch(SQLException e){
             System.out.println(e.getMessage());
         }
-        return accounts;
+        return null;
     }
 }

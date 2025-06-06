@@ -6,17 +6,11 @@ import Service.AccountService;
 import Service.MessageService;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
-
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-/**
- * TODO: You will need to write your own endpoints and handlers for your controller. The endpoints you will need can be
- * found in readme.md as well as the test cases. You should
- * refer to prior mini-project labs and lecture materials for guidance on how a controller may be built.
- */
 public class SocialMediaController {
 
     AccountService accountService;
@@ -112,21 +106,51 @@ public class SocialMediaController {
 
     private void getMessages(Context context) {
         List<Message> messages = messageService.getAllMessages();
-        context.json(messages);
+        if(messages != null) {
+            context.json(messages);
+        }
+        else {
+            context.json("");
+        }
     }
 
-    private void getMessage(Context context) {
+    private void getMessage(Context context) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
         int id = Integer.valueOf(context.pathParam("message_id"));
         Message message = messageService.getMessage(id);
-        context.json(message);
+        if(message != null) {
+            context.json(mapper.writeValueAsString(message));
+        }
+        else {
+            context.json("");
+        }
     }
 
-    private void deleteMessage(Context context) {
-        context.json("sample text");
+    private void deleteMessage(Context context) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        int id = Integer.valueOf(context.pathParam("message_id"));
+        Message message = messageService.getMessage(id);
+        if(message != null) {
+            context.json(mapper.writeValueAsString(message));
+        }
+        else {
+            context.json("");
+        }
     }
 
-    private void updateMessage(Context context) {
-        context.json("sample text");
+    private void updateMessage(Context context) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        int id = Integer.valueOf(context.pathParam("message_id"));
+        Message message = mapper.readValue(context.body(), Message.class);
+        String messageText = message.getMessage_text();
+        if(messageText.length() > 0 && messageText.length() <= 255 && messageService.getMessage(id) != null) {
+            messageService.updateMessage(id, messageText);
+            Message updatedMessage = messageService.getMessage(id);
+            context.json(mapper.writeValueAsString(updatedMessage));
+        }
+        else {
+            context.status(400);
+        }
     }
 
     private void getUserMessages(Context context) {

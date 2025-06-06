@@ -12,7 +12,7 @@ public class MessageDAO {
     public Message insertMessage(Message message){
         Connection connection = ConnectionUtil.getConnection();
         try {
-            String sql = "INSERT INTO message(posted_by, message_text, time_posted_epoch) VALUES(?,?,?)";
+            String sql = "INSERT INTO message(posted_by, message_text, time_posted_epoch) VALUES(?,?,?);";
             PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
 
             preparedStatement.setInt(1, message.getPosted_by());
@@ -34,13 +34,12 @@ public class MessageDAO {
     public Message getMessage(int id) {
         Connection connection = ConnectionUtil.getConnection();
         try {
-            String sql = "SELECT * FROM message WHERE message_id = ?";
-            PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            String sql = "SELECT * FROM message WHERE message_id = ?;";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
 
             preparedStatement.setInt(1, id);
 
-            preparedStatement.executeUpdate();
-            ResultSet pkeyResultSet = preparedStatement.getGeneratedKeys();
+            ResultSet pkeyResultSet = preparedStatement.executeQuery();
             if(pkeyResultSet.next()){
                 return new Message(id, pkeyResultSet.getInt(2), pkeyResultSet.getString(3), pkeyResultSet.getLong(4));
             }
@@ -54,11 +53,10 @@ public class MessageDAO {
         Connection connection = ConnectionUtil.getConnection();
         List<Message> messages = new ArrayList<>();
         try {
-            String sql = "SELECT * FROM message";
-            PreparedStatement preparedStatement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            String sql = "SELECT * FROM message;";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
 
-            preparedStatement.executeUpdate();
-            ResultSet pkeyResultSet = preparedStatement.getGeneratedKeys();
+            ResultSet pkeyResultSet = preparedStatement.executeQuery();
             while(pkeyResultSet.next()){
                 messages.add(new Message(pkeyResultSet.getInt(1), pkeyResultSet.getInt(2), pkeyResultSet.getString(3), pkeyResultSet.getLong(4)));
             }
@@ -67,5 +65,38 @@ public class MessageDAO {
             System.out.println(e.getMessage());
         }
         return null;
+    }
+
+    public Message deleteMessage(int id) {
+        Connection connection = ConnectionUtil.getConnection();
+        try {
+            String sql = "DELETE FROM message WHERE message_id = ?;";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+            preparedStatement.setInt(1, id);
+
+            ResultSet pkeyResultSet = preparedStatement.executeQuery();
+            if(pkeyResultSet.next()){
+                return new Message(id, pkeyResultSet.getInt(2), pkeyResultSet.getString(3), pkeyResultSet.getLong(4));
+            }
+        }catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
+
+    public void updateMessage(int id, String messageText) {
+        Connection connection = ConnectionUtil.getConnection();
+        try {
+            String sql = "UPDATE message SET message_text = ? WHERE message_id = ?;";
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+
+            preparedStatement.setString(1, messageText);
+            preparedStatement.setInt(2, id);
+
+            preparedStatement.executeUpdate();
+        }catch(SQLException e){
+            System.out.println(e.getMessage());
+        }
     }
 }
