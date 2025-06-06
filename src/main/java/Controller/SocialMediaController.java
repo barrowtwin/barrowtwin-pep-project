@@ -45,14 +45,9 @@ public class SocialMediaController {
     private void registerUser(Context context) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         Account user = mapper.readValue(context.body(), Account.class);
-        if(user.getUsername().length() > 0 && user.getPassword().length() >= 4) {
-            Account addedUser = accountService.addUser(user);
-            if(addedUser != null) {
-                context.json(mapper.writeValueAsString(addedUser));
-            }
-            else {
-                context.status(400);
-            }
+        Account createdUser = accountService.addUser(user);
+        if(createdUser != null) {
+            context.json(mapper.writeValueAsString(createdUser));
         }
         else {
             context.status(400);
@@ -62,20 +57,11 @@ public class SocialMediaController {
     private void login(Context context) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         Account user = mapper.readValue(context.body(), Account.class);
-        List<Account> users = accountService.getAllAccounts();
-        boolean userExists = false;
-        boolean correctPassword = false;
-        for(Account u : users) {
-            if(user.getUsername().equals(u.getUsername())) {
-                userExists = true;
-                if(user.getPassword().equals(u.getPassword())) {
-                    correctPassword = true;
-                    // May need to change what is sent to this method
-                    context.json(u);
-                }
-            }
+        Account loggedInUser = accountService.login(user);
+        if(loggedInUser != null) {
+            context.json(loggedInUser);
         }
-        if(userExists == false || correctPassword == false) {
+        else {
             context.status(401);
         }
     }
@@ -83,14 +69,9 @@ public class SocialMediaController {
     private void createMessage(Context context) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         Message message = mapper.readValue(context.body(), Message.class);
-        List<Account> users = accountService.getAllAccounts();
-        boolean userExists = false;
-        for(Account u : users) {
-            if(u.getAccount_id() == message.getPosted_by()) {
-                userExists = true;
-            }
-        }
-        if(message.getMessage_text().length() > 0 && message.getMessage_text().length() <= 255 && userExists) {
+        int postedBy = message.getPosted_by();
+        boolean userExists = accountService.checkUserExists(postedBy);
+        if(userExists) {
             Message createdMessage = messageService.addMessage(message);
             if(createdMessage != null) {
                 context.json(mapper.writeValueAsString(createdMessage));

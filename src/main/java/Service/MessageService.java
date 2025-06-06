@@ -17,7 +17,12 @@ public class MessageService {
     }
 
     public Message addMessage(Message message) {
-        return messageDAO.insertMessage(message);
+        if(message.getMessage_text().length() > 0 && message.getMessage_text().length() <= 255) {
+            return messageDAO.insertMessage(message);
+        }
+        else {
+            return null;
+        }
     }
 
     public Message getMessage(int id) {
@@ -36,7 +41,9 @@ public class MessageService {
         return messageDAO.getAllMessages();
     }
 
-    public void updateMessage(int id, String messageText) {
+    public Message updateMessage(Message message) {
+
         messageDAO.updateMessage(id, messageText);
+        return
     }
 }
