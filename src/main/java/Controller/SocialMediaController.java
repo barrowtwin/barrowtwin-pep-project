@@ -154,6 +154,13 @@ public class SocialMediaController {
     }
 
     private void getUserMessages(Context context) {
-        context.json("sample text");
+        int id = Integer.valueOf(context.pathParam("account_id"));
+        List<Message> messages = messageService.getUserMessages(id);
+        if(messages != null) {
+            context.json(messages);
+        }
+        else {
+            context.json("");
+        }
     }
 }
